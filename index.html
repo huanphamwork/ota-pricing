@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ma Trận Giá Stacking + Quỹ Dự Phòng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+            <div class="p-3 bg-purple-100 text-purple-600 rounded-xl">
+                <i data-lucide="calculator" class="w-7 h-7"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">Ma Trận Giá Stacking + Quỹ Dự Phòng</h1>
+                <p class="text-slate-500 text-sm mt-1">Chồng chéo nhiều lớp khuyến mại. Giữ nguyên chiến lược sinh thặng dư lợi nhuận.</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <div class="lg:col-span-6 space-y-6">
+                
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 grid grid-cols-2 gap-4">
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">1. Net Thu Về</label>
+                        <input type="number" id="netResort" value="1000000" class="w-full font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none" />
+                    </div>
+                    
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">2. Nền tảng OTA</label>
+                        <select id="selectedPlatform" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none mb-3">
+                            <option value="booking">🟦 Booking.com</option>
+                            <option value="agoda">🟥 Agoda</option>
+                            <option value="traveloka">🐦 Traveloka</option>
+                            <option value="direct">💬 Bán Trực Tiếp</option>
+                        </select>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-medium text-slate-500 mb-1">Hoa hồng OTA</label>
+                                <div class="relative">
+                                    <input type="number" id="customComm" value="15" class="w-full p-2 pr-7 text-sm font-semibold text-orange-600 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none" />
+                                    <i data-lucide="percent" class="w-3 h-3 absolute right-2 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-slate-500 mb-1">Thuế FCT</label>
+                                <div class="relative">
+                                    <input type="number" id="customFct" value="10" class="w-full p-2 pr-7 text-sm font-semibold text-red-600 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none" />
+                                    <i data-lucide="percent" class="w-3 h-3 absolute right-2 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-2 mt-2">
+                        <div class="flex justify-between mb-1">
+                            <label class="text-sm font-medium text-slate-700">Phí Vận Hành / Thưởng KD</label>
+                            <span id="opsFeeDisplay" class="text-sm font-bold text-blue-600">3%</span>
+                        </div>
+                        <input type="range" id="opsFeePct" min="0" max="20" step="1" value="3" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold flex items-center gap-2">
+                            <span class="bg-purple-100 text-purple-700 p-1.5 rounded-lg"><i data-lucide="ticket-percent" class="w-5 h-5"></i></span>
+                            3. Xếp Lớp Khuyến Mại
+                        </h2>
+                        <button id="addPromoBtn" class="flex items-center gap-1 text-sm bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg font-medium hover:bg-purple-100 transition">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Thêm Lớp
+                        </button>
+                    </div>
+                    
+                    <div id="promosContainer" class="space-y-3">
+                        </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-6">
+                <div id="errorBox" class="hidden bg-red-50 text-red-600 p-6 rounded-2xl border border-red-100 flex items-start gap-3">
+                    <i data-lucide="alert-circle"></i>
+                    <p id="errorText" class="font-medium"></p>
+                </div>
+
+                <div id="resultBox" class="space-y-6 sticky top-6">
+                    <div class="bg-slate-900 text-white p-8 rounded-3xl shadow-lg relative overflow-hidden text-center">
+                        <h3 class="text-slate-400 font-medium mb-1 text-sm uppercase tracking-wider">Giá Gạch Ngang Thiết Lập OTA</h3>
+                        <div id="listPriceDisplay" class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2"></div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 p-4 border-b border-slate-200 flex items-center justify-between">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <i data-lucide="piggy-bank" class="w-5 h-5 text-green-600"></i>
+                                Kịch bản 1: Bán nguyên giá (0% Khuyến mại)
+                            </h3>
+                        </div>
+                        <div class="p-4 space-y-3 text-sm">
+                            <div class="flex justify-between items-center pb-2 border-b border-dashed">
+                                <span class="text-slate-500">Tiền khách trả:</span>
+                                <span id="s1_paidPrice" class="font-semibold text-slate-700"></span>
+                            </div>
+                            <div class="flex justify-between items-center text-slate-500">
+                                <span id="s1_otaLabel">Trích Hoa hồng OTA:</span>
+                                <span id="s1_otaFee"></span>
+                            </div>
+                            <div id="s1_fctContainer" class="flex justify-between items-center text-slate-500 hidden">
+                                <span>Trích Thuế FCT:</span>
+                                <span id="s1_fctFee"></span>
+                            </div>
+                            <div class="flex justify-between items-center text-slate-500">
+                                <span id="s1_opsLabel">Trích Phí Vận hành:</span>
+                                <span id="s1_opsFee"></span>
+                            </div>
+                            <div class="flex justify-between items-center font-medium text-purple-600">
+                                <span>Quỹ Khuyến Mãi được bảo toàn:</span>
+                                <span id="s1_promoBuffer"></span>
+                            </div>
+                            <div class="pt-2 border-t flex justify-between items-center mt-2">
+                                <span class="font-bold text-slate-700">Tổng Net Thu Về:</span>
+                                <div class="text-right">
+                                    <span id="s1_totalNet" class="font-bold text-lg text-green-600"></span>
+                                    <p class="text-[10px] text-slate-400 font-normal mt-0.5">(Đã bao gồm tiền Quỹ đút túi)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                        <div class="absolute top-0 right-0 bg-purple-100 text-purple-700 text-[10px] font-bold px-3 py-1 rounded-bl-lg">
+                            THỰC TẾ TRÊN OTA
+                        </div>
+                        <div class="bg-purple-50 p-4 border-b border-purple-100 flex items-center justify-between">
+                            <h3 class="font-bold text-purple-900 flex items-center gap-2">
+                                <i data-lucide="ticket-percent" class="w-5 h-5"></i>
+                                Kịch bản 2: Bật Khuyến Mãi
+                            </h3>
+                        </div>
+                        <div class="p-4 space-y-3 text-sm">
+                            <div class="flex justify-between items-center pb-2 border-b border-dashed">
+                                <span class="text-slate-500">Giá ban đầu:</span>
+                                <span id="listPriceStart" class="font-bold text-slate-800"></span>
+                            </div>
+                            
+                            <div id="promoBreakdownContainer" class="mt-2">
+                                </div>
+
+                            <div class="mt-4 pt-4 border-t-2 border-dashed border-slate-200 bg-green-50 -mx-4 -mb-4 p-4 rounded-b-2xl">
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="font-bold text-slate-700">KHÁCH THỰC TRẢ (QUẸT THẺ):</span>
+                                    <span id="paidPriceDisplay" class="text-xl font-black text-green-700"></span>
+                                </div>
+                                <div class="space-y-2 text-sm text-slate-600">
+                                    <div class="flex justify-between"><span>Trích Hoa hồng OTA:</span><span id="feeOta"></span></div>
+                                    <div class="flex justify-between hidden" id="feeFctContainer"><span>Trích Thuế FCT:</span><span id="feeFct"></span></div>
+                                    <div class="flex justify-between"><span>Trích Phí Vận Hành / Thưởng:</span><span id="feeOps"></span></div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-green-200 flex justify-between items-end">
+                                    <div>
+                                        <span class="font-bold text-green-900 uppercase block mb-1">Net Bỏ Túi Thực Tế:</span>
+                                        <span id="surplusContainer" class="hidden text-xs text-green-700 font-medium bg-green-100 px-2 py-0.5 rounded flex items-center gap-1">
+                                            <i data-lucide="trending-up" class="w-3 h-3"></i> Thặng dư: <span id="surplusDisplay"></span>
+                                        </span>
+                                    </div>
+                                    <span id="totalNetDisplay" class="text-2xl font-black text-green-700"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Cấu hình dữ liệu nền tảng
+        const OTA_PLATFORMS = {
+            booking: { comm: 15, hasFct: true },
+            agoda: { comm: 15, hasFct: true },
+            traveloka: { comm: 15, hasFct: false },
+            direct: { comm: 0, hasFct: false }
+        };
+
+        // Biến trạng thái (State)
+        let state = {
+            netResort: 1000000,
+            platform: 'booking',
+            customComm: 15,
+            customFct: 10,
+            opsFeePct: 3,
+            promos: [
+                { id: 1, name: 'Khuyến mại mặc định (Basic Deal)', type: 'percent', value: 20 }
+            ]
+        };
+
+        // Hàm định dạng tiền tệ
+        const formatVND = (num) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
+
+        // Lấy các element DOM
+        const els = {
+            netResort: document.getElementById('netResort'),
+            platform: document.getElementById('selectedPlatform'),
+            customComm: document.getElementById('customComm'),
+            customFct: document.getElementById('customFct'),
+            opsFeePct: document.getElementById('opsFeePct'),
+            opsFeeDisplay: document.getElementById('opsFeeDisplay'),
+            promosContainer: document.getElementById('promosContainer'),
+            addPromoBtn: document.getElementById('addPromoBtn'),
+            
+            errorBox: document.getElementById('errorBox'),
+            errorText: document.getElementById('errorText'),
+            resultBox: document.getElementById('resultBox'),
+            
+            listPriceDisplay: document.getElementById('listPriceDisplay'),
+            
+            // Kịch bản 1 Elements
+            s1_paidPrice: document.getElementById('s1_paidPrice'),
+            s1_otaLabel: document.getElementById('s1_otaLabel'),
+            s1_otaFee: document.getElementById('s1_otaFee'),
+            s1_fctContainer: document.getElementById('s1_fctContainer'),
+            s1_fctFee: document.getElementById('s1_fctFee'),
+            s1_opsLabel: document.getElementById('s1_opsLabel'),
+            s1_opsFee: document.getElementById('s1_opsFee'),
+            s1_promoBuffer: document.getElementById('s1_promoBuffer'),
+            s1_totalNet: document.getElementById('s1_totalNet'),
+            
+            // Kịch bản 2 Elements
+            listPriceStart: document.getElementById('listPriceStart'),
+            promoBreakdownContainer: document.getElementById('promoBreakdownContainer'),
+            paidPriceDisplay: document.getElementById('paidPriceDisplay'),
+            feeOta: document.getElementById('feeOta'),
+            feeFctContainer: document.getElementById('feeFctContainer'),
+            feeFct: document.getElementById('feeFct'),
+            feeOps: document.getElementById('feeOps'),
+            surplusContainer: document.getElementById('surplusContainer'),
+            surplusDisplay: document.getElementById('surplusDisplay'),
+            totalNetDisplay: document.getElementById('totalNetDisplay'),
+        };
+
+        // --- HÀM TÍNH TOÁN CỐT LÕI (CORE MATH) ---
+        function calculate() {
+            const commRate = state.customComm / 100;
+            const fctRate = state.customFct / 100;
+            const fctTotalRate = commRate * fctRate;
+            const opsRate = state.opsFeePct / 100;
+            const hasFct = OTA_PLATFORMS[state.platform].hasFct && state.customFct > 0;
+
+            let totalPromoPct = 0;
+            let totalPromoFixed = 0;
+
+            state.promos.forEach(p => {
+                const val = Number(p.value) || 0;
+                if (p.type === 'percent') totalPromoPct += val / 100;
+                else totalPromoFixed += val;
+            });
+
+            const totalDeductionRate = commRate + fctTotalRate + opsRate + totalPromoPct;
+
+            // Xử lý lỗi nếu % >= 100%
+            if (totalDeductionRate >= 1) {
+                els.errorText.innerText = "Tổng phí và khuyến mại (%) vượt quá 100%. Vui lòng giảm bớt!";
+                els.errorBox.classList.remove('hidden');
+                els.resultBox.classList.add('hidden');
+                return;
+            } else {
+                els.errorBox.classList.add('hidden');
+                els.resultBox.classList.remove('hidden');
+            }
+
+            // 1. Tính giá niêm yết (Gross Price)
+            const listPrice = Math.round((state.netResort + totalPromoFixed) / (1 - totalDeductionRate));
+
+            // 2. Mô phỏng hành trình áp mã
+            let currentPrice = listPrice;
+            const promoBreakdown = state.promos.map(promo => {
+                const val = Number(promo.value) || 0;
+                let discountAmount = 0;
+                if (promo.type === 'percent') discountAmount = Math.round(listPrice * (val / 100));
+                else discountAmount = val;
+
+                currentPrice -= discountAmount;
+                return { ...promo, discountAmount, priceAfter: currentPrice };
+            });
+
+            const paidPrice = currentPrice;
+
+            // 3. Tính phí thực tế trên tiền khách trả
+            const actualOta = Math.round(paidPrice * commRate);
+            const actualFct = Math.round(actualOta * fctRate);
+            const actualOps = Math.round(paidPrice * opsRate);
+            const actualNet = paidPrice - actualOta - (hasFct ? actualFct : 0) - actualOps;
+            const surplus = actualNet - state.netResort;
+
+            // --- TÍNH TOÁN CHO KỊCH BẢN 1 (BÁN NGUYÊN GIÁ) ---
+            const s1_Ota = Math.round(listPrice * commRate);
+            const s1_Fct = Math.round(s1_Ota * fctRate);
+            const s1_Ops = Math.round(listPrice * opsRate);
+            const s1_TotalNet = listPrice - s1_Ota - (hasFct ? s1_Fct : 0) - s1_Ops;
+            const s1_PromoBuffer = s1_TotalNet - state.netResort;
+
+            // --- RENDER KẾT QUẢ KỊCH BẢN 1 ---
+            els.s1_paidPrice.innerText = formatVND(listPrice);
+            els.s1_otaLabel.innerText = `Trích Hoa hồng OTA (${state.customComm}%):`;
+            els.s1_otaFee.innerText = `-${formatVND(s1_Ota)}`;
+            
+            if (hasFct) {
+                els.s1_fctContainer.classList.remove('hidden');
+                els.s1_fctFee.innerText = `-${formatVND(s1_Fct)}`;
+            } else {
+                els.s1_fctContainer.classList.add('hidden');
+            }
+            
+            els.s1_opsLabel.innerText = `Trích Phí Vận hành (${state.opsFeePct}%):`;
+            els.s1_opsFee.innerText = `-${formatVND(s1_Ops)}`;
+            els.s1_promoBuffer.innerText = formatVND(s1_PromoBuffer);
+            els.s1_totalNet.innerText = formatVND(s1_TotalNet);
+
+            // --- RENDER KẾT QUẢ KỊCH BẢN 2 ---
+            els.listPriceDisplay.innerText = formatVND(listPrice);
+            els.listPriceStart.innerText = formatVND(listPrice);
+            els.paidPriceDisplay.innerText = formatVND(paidPrice);
+            
+            els.feeOta.innerText = `-${formatVND(actualOta)}`;
+            els.feeOps.innerText = `-${formatVND(actualOps)}`;
+            
+            if (hasFct) {
+                els.feeFctContainer.classList.remove('hidden');
+                els.feeFct.innerText = `-${formatVND(actualFct)}`;
+            } else {
+                els.feeFctContainer.classList.add('hidden');
+            }
+
+            els.totalNetDisplay.innerText = formatVND(actualNet);
+            
+            if (surplus > 0) {
+                els.surplusContainer.classList.remove('hidden');
+                els.surplusDisplay.innerText = `+${formatVND(surplus)}`;
+            } else {
+                els.surplusContainer.classList.add('hidden');
+            }
+
+            // Render Lịch sử trừ tiền Khuyến Mại
+            els.promoBreakdownContainer.innerHTML = promoBreakdown.map(p => `
+                <div class="flex justify-center -my-1 relative z-10"><i data-lucide="arrow-down" class="w-4 h-4 text-purple-300 bg-white"></i></div>
+                <div class="bg-purple-50/50 p-3 rounded-lg flex justify-between items-center my-1 border border-purple-100/50">
+                    <div>
+                        <p class="text-sm font-medium text-purple-900">${p.name}</p>
+                        <p class="text-xs text-purple-600">Áp dụng trừ ${p.type === 'percent' ? p.value + '%' : formatVND(p.value)}</p>
+                    </div>
+                    <span class="text-sm font-bold text-red-500">-${formatVND(p.discountAmount)}</span>
+                </div>
+                <div class="flex justify-center -my-1 relative z-10"><i data-lucide="arrow-down" class="w-4 h-4 text-purple-300 bg-white"></i></div>
+                <div class="flex justify-between items-center py-2 text-sm text-slate-500">
+                    <span>Giá còn lại:</span>
+                    <span class="font-medium text-slate-700">${formatVND(p.priceAfter)}</span>
+                </div>
+            `).join('');
+
+            // Cập nhật lại Icons cho các thẻ mới tạo
+            lucide.createIcons();
+        }
+
+        // --- RENDER DANH SÁCH KHUYẾN MẠI (UI) ---
+        function renderPromosUI() {
+            els.promosContainer.innerHTML = state.promos.map((p, index) => `
+                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 relative group">
+                    <div class="absolute -left-3 top-1/2 -translate-y-1/2 bg-slate-200 text-slate-500 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-4 border-white">${index + 1}</div>
+                    <div class="grid grid-cols-12 gap-3 pl-2">
+                        <div class="col-span-12 md:col-span-5">
+                            <input type="text" value="${p.name}" oninput="updatePromo(${p.id}, 'name', this.value)" class="w-full p-2 text-sm bg-white border border-slate-200 rounded-lg" placeholder="Tên khuyến mại" />
+                        </div>
+                        <div class="col-span-4 md:col-span-3">
+                            <select onchange="updatePromo(${p.id}, 'type', this.value)" class="w-full p-2 text-sm bg-white border border-slate-200 rounded-lg">
+                                <option value="percent" ${p.type === 'percent' ? 'selected' : ''}>Giảm %</option>
+                                <option value="fixed" ${p.type === 'fixed' ? 'selected' : ''}>Tiền VNĐ</option>
+                            </select>
+                        </div>
+                        <div class="col-span-6 md:col-span-3">
+                            <input type="number" value="${p.value}" oninput="updatePromo(${p.id}, 'value', this.value)" class="w-full p-2 text-sm bg-white border border-slate-200 rounded-lg font-semibold text-purple-600" />
+                        </div>
+                        <div class="col-span-2 md:col-span-1 flex items-center justify-end">
+                            <button onclick="removePromo(${p.id})" class="text-slate-400 hover:text-red-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // --- CÁC HÀM XỬ LÝ SỰ KIỆN ---
+        function updatePromo(id, field, value) {
+            const promo = state.promos.find(p => p.id === id);
+            if (promo) promo[field] = value;
+            calculate();
+        }
+
+        function removePromo(id) {
+            state.promos = state.promos.filter(p => p.id !== id);
+            renderPromosUI();
+            calculate();
+        }
+
+        els.addPromoBtn.addEventListener('click', () => {
+            state.promos.push({ id: Date.now(), name: 'Khuyến mại mới', type: 'percent', value: 10 });
+            renderPromosUI();
+            calculate();
+        });
+
+        els.netResort.addEventListener('input', (e) => { state.netResort = Number(e.target.value); calculate(); });
+        els.customComm.addEventListener('input', (e) => { state.customComm = Number(e.target.value); calculate(); });
+        els.customFct.addEventListener('input', (e) => { state.customFct = Number(e.target.value); calculate(); });
+        
+        els.opsFeePct.addEventListener('input', (e) => { 
+            state.opsFeePct = Number(e.target.value); 
+            els.opsFeeDisplay.innerText = state.opsFeePct + '%';
+            calculate(); 
+        });
+
+        els.platform.addEventListener('change', (e) => {
+            state.platform = e.target.value;
+            const platData = OTA_PLATFORMS[state.platform];
+            state.customComm = platData.comm;
+            state.customFct = platData.hasFct ? 10 : 0;
+            
+            els.customComm.value = state.customComm;
+            els.customFct.value = state.customFct;
+            calculate();
+        });
+
+        // --- KHỞI TẠO ỨNG DỤNG ---
+        lucide.createIcons();
+        renderPromosUI();
+        calculate();
+
+    </script>
+</body>
+</html>
